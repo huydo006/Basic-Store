@@ -6,11 +6,11 @@ import lombok.Setter;
 import java.math.BigDecimal;
 @Getter
 @Setter
-public class OrderReponse {
+public class OrderResponse {
     private String customerName;
     private String customerEmail;
     private String status;
     private BigDecimal total_amount;
-    private java.util.List<OrderItemRequest> orderItems;
+    private java.util.List<OrderItemResponse> orderItems;
 
 }

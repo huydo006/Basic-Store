@@ -1,8 +1,9 @@
 package org.example.store_byspringboot.service;
 
 import jakarta.transaction.Transactional;
+import org.example.store_byspringboot.dto.OrderItemResponse;
 import org.example.store_byspringboot.dto.OrderItemRequest;
-import org.example.store_byspringboot.dto.OrderReponse;
+import org.example.store_byspringboot.dto.OrderResponse;
 import org.example.store_byspringboot.dto.OrderRequest;
 import org.example.store_byspringboot.model.OrderItem;
 import org.example.store_byspringboot.model.Orders;
@@ -10,7 +11,6 @@ import org.example.store_byspringboot.model.Product;
 import org.example.store_byspringboot.repository.OrderItemRepository;
 import org.example.store_byspringboot.repository.OrderRepository;
 import org.example.store_byspringboot.repository.ProductRepository;
-import org.hibernate.query.Order;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -77,6 +77,47 @@ public class OrderService {
         return orders;
     }
 
+    //Viết một hàm để lấy ra thông tin chi tiết của một Đơn hàng (dựa vào ID),
+    // bao gồm cả danh sách các sản phẩm và số lượng mua trong đơn đó.
+    public OrderResponse getOrderbyId(Integer id){
+        OrderResponse rs = new OrderResponse();
 
+        Orders order =orderRepository.findById(id).orElse(null);
+
+        rs.setCustomerName(order.getCustomerName());
+        rs.setCustomerEmail(order.getCustomerEmail());
+        rs.setTotal_amount(order.getTotalAmount());
+        rs.setStatus(order.getStatus());
+
+        List<OrderItemResponse> listItemRep = new ArrayList<>();
+        for(OrderItem orderItem : order.getOrderItems()){
+            OrderItemResponse item = new OrderItemResponse();
+
+            item.setProductId(orderItem.getProduct().getId());
+            item.setProductName(orderItem.getProduct().getName());
+            item.setQuantity(orderItem.getQuantity());
+
+            listItemRep.add(item);
+        }
+        rs.setOrderItems(listItemRep);
+
+        return rs;
+    }
+
+    @Transactional
+    public void cancelOrder(Integer id){
+        Orders orders = orderRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("Order not found with ID : " +id));
+        if (orders.getStatus().equals("Cancelled")){
+            throw new RuntimeException("Order Cancelled before");
+        }
+        for(OrderItem o : orders.getOrderItems()){
+            Product product = o.getProduct();
+            product.setStock(product.getStock() + o.getQuantity());
+            productRepository.save(product);
+        }
+        orders.setStatus("Cancelled");
+        orderRepository.save(orders);
+    }
 
 }
