@@ -1,5 +1,6 @@
 package org.example.store_byspringboot.controller;
 
+import org.example.store_byspringboot.dto.ProductResponse;
 import org.example.store_byspringboot.model.Product;
 import org.example.store_byspringboot.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> getAllProducts() {
+    public List<ProductResponse> getAllProducts() {
         // Logic to get all products
         return productService.getAllProducts();
     }
